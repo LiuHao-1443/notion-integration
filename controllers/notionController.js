@@ -234,7 +234,7 @@ exports.saveToNotion = async (req, res) => {
 
     if (existingPageId) {
       // 如果页面已存在，更新现有页面
-      await updateExistingPage(existingPageId, unfinishedTasks);
+      await updateExistingPage(existingPageId, unfinishedTasks, notion);
       res.json({ message: "在 Notion 中已更新明天的页面" });
     } else {
       // 如果页面不存在，创建新页面
@@ -385,7 +385,7 @@ async function findExistingDayPage(weekPageId, pageTitle, notion) {
 }
 
 // 更新辅助函数：更新现有页面
-async function updateExistingPage(pageId, unfinishedTasks) {
+async function updateExistingPage(pageId, unfinishedTasks, notion) {
   // 获取现有页面内容
   const existingBlocks = await notion.blocks.children.list({
     block_id: pageId,
