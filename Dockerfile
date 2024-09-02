@@ -20,4 +20,4 @@ COPY . .
 EXPOSE 23003
 
 # 启动应用
-CMD ["DEBUG=notion-integration:*", "npm", "start"]
+CMD ["npm", "start"]
