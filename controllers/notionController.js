@@ -18,24 +18,28 @@ exports.getNotionPageContent = async (req, res) => {
       currentDate
     )}周`;
     const pageTitle = `${formatDate(currentDate)} ${getDayOfWeek(currentDate)}`;
+    console.log("pageTitle ==>", pageTitle);
 
     // 查找年份页面
     const yearPageId = await findYearPage(rootPageId, currentYear, notion);
     if (!yearPageId) {
       throw new Error("未找到对应的年份页面");
     }
+    console.log("yearPageId ==>", yearPageId);
 
     // 查找周页面
     const weekPageId = await findWeekPage(yearPageId, weekTitle, notion);
     if (!weekPageId) {
       throw new Error("未找到对应的周页面");
     }
+    console.log("weekPageId ==>", weekPageId);
 
     // 查找日期页面
     const dayPageId = await findDayPage(weekPageId, pageTitle, notion);
     if (!dayPageId) {
       throw new Error("未找到对应的日期页面");
     }
+    console.log("dayPageId ==>", dayPageId);
 
     // 获取页面内容
     const blocks = await notion.blocks.children.list({
@@ -73,32 +77,45 @@ exports.getNotionPageContent = async (req, res) => {
 
 // 辅助函数：查找年份页面
 async function findYearPage(parentId, year, notion) {
-  const response = await notion.search({
-    query: `${year}年`,
-    filter: { property: "object", value: "page" },
-    sort: { direction: "descending", timestamp: "last_edited_time" },
+  const childPages = await notion.blocks.children.list({
+    block_id: parentId,
+    page_size: 100,
   });
-  return response.results[0]?.id;
+
+  const yearPage = childPages.results.find(
+    (page) =>
+      page.type === "child_page" && page.child_page.title === `${year}年`
+  );
+
+  return yearPage ? yearPage.id : null;
 }
 
 // 辅助函数：查找周页面
 async function findWeekPage(parentId, weekTitle, notion) {
-  const response = await notion.search({
-    query: weekTitle,
-    filter: { property: "object", value: "page" },
-    sort: { direction: "descending", timestamp: "last_edited_time" },
+  const childPages = await notion.blocks.children.list({
+    block_id: parentId,
+    page_size: 100,
   });
-  return response.results[0]?.id;
+
+  const weekPage = childPages.results.find(
+    (page) => page.type === "child_page" && page.child_page.title === weekTitle
+  );
+
+  return weekPage ? weekPage.id : null;
 }
 
 // 辅助函数：查找日期页面
 async function findDayPage(parentId, pageTitle, notion) {
-  const response = await notion.search({
-    query: pageTitle,
-    filter: { property: "object", value: "page" },
-    sort: { direction: "descending", timestamp: "last_edited_time" },
+  const childPages = await notion.blocks.children.list({
+    block_id: parentId,
+    page_size: 100,
   });
-  return response.results[0]?.id;
+
+  const dayPage = childPages.results.find(
+    (page) => page.type === "child_page" && page.child_page.title === pageTitle
+  );
+
+  return dayPage ? dayPage.id : null;
 }
 
 // 辅助函数：获取周范围
