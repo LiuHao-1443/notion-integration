@@ -1,7 +1,6 @@
 # 定义变量
 APP_NAME = notion-integration
 DOCKER_IMAGE = $(APP_NAME):latest
-TZ ?= Asia/Shanghai
 
 # 默认目标
 .PHONY: all
@@ -18,7 +17,7 @@ run:
 	docker run -d \
 			--network host \
 			--restart always \
-			-e TZ=$(TZ) \
+			-v /etc/localtime:/etc/localtime:ro -v /etc/timezone:/etc/timezone:ro \
 			-e PORT=23003 \
 			-e http_proxy=http://127.0.0.1:15777 \
 			-e https_proxy=http://127.0.0.1:15777 \
